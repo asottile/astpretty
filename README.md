@@ -24,7 +24,7 @@ Return a string representation of the ast node.
 
 ```
 >>> astpretty.pformat(ast.parse('if x == y: y += 4').body[0])
-u"If(\n    test=Compare(\n        left=Name(id='x', ctx=Load()),\n        ops=[Eq()],\n        comparators=[Name(id='y', ctx=Load())],\n    ),\n    body=[\n        AugAssign(\n            target=Name(id='y', ctx=Store()),\n            op=Add(),\n            value=Num(n=4),\n        ),\n    ],\n    orelse=[],\n)"
+"If(\n    test=Compare(\n        left=Name(id='x', ctx=Load()),\n        ops=[Eq()],\n        comparators=[Name(id='y', ctx=Load())],\n    ),\n    body=[\n        AugAssign(\n            target=Name(id='y', ctx=Store()),\n            op=Add(),\n            value=Num(n=4),\n        ),\n    ],\n    orelse=[],\n)"
 ```
 
 
