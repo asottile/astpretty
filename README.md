@@ -6,7 +6,7 @@ astpretty
 
 Pretty print the output of python stdlib `ast.parse`.
 
-astpretty is intended to be a replacements for `ast.dump`.
+astpretty is intended to be a replacement for `ast.dump`.
 
 ## Installation
 
