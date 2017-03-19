@@ -25,7 +25,7 @@ def _is_leaf(node):
         return True
 
 
-def pformat(node, _indent=0):
+def pformat(node, indent='    ', _indent=0):
     if _is_leaf(node):
         return ast.dump(node)
     else:
@@ -39,7 +39,10 @@ def pformat(node, _indent=0):
             state.indent -= 1
 
         def indentstr():
-            return state.indent * '    '
+            return state.indent * indent
+
+        def _pformat(el, _indent=0):
+            return pformat(el, indent=indent, _indent=_indent)
 
         out = type(node).__name__ + '(\n'
         with indented():
@@ -53,17 +56,17 @@ def pformat(node, _indent=0):
                         isinstance(attr[0], ast.AST) and
                         _is_leaf(attr[0])
                 ):
-                    representation = '[{}]'.format(pformat(attr[0]))
+                    representation = '[{}]'.format(_pformat(attr[0]))
                 elif isinstance(attr, list):
                     representation = '[\n'
                     with indented():
                         for el in attr:
                             representation += '{}{},\n'.format(
-                                indentstr(), pformat(el, state.indent),
+                                indentstr(), _pformat(el, state.indent),
                             )
                     representation += indentstr() + ']'
                 elif isinstance(attr, ast.AST):
-                    representation = pformat(attr, state.indent)
+                    representation = _pformat(attr, state.indent)
                 else:
                     representation = repr(attr)
                 out += '{}{}={},\n'.format(indentstr(), field, representation)
@@ -71,5 +74,5 @@ def pformat(node, _indent=0):
         return out
 
 
-def pprint(node):
-    print(pformat(node))
+def pprint(*args, **kwargs):
+    print(pformat(*args, **kwargs))

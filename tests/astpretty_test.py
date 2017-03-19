@@ -81,6 +81,20 @@ def test_pformat_nested_multiple_elements():
     )
 
 
+def test_pformat_custom_indent():
+    ret = astpretty.pformat(_to_expr_value('[1, 2, 3]'), indent='\t')
+    assert ret == (
+        'List(\n'
+        '\telts=[\n'
+        '\t\tNum(n=1),\n'
+        '\t\tNum(n=2),\n'
+        '\t\tNum(n=3),\n'
+        '\t],\n'
+        '\tctx=Load(),\n'
+        ')'
+    )
+
+
 def test_pprint(capsys):
     astpretty.pprint(_to_expr_value('x'))
     out, _ = capsys.readouterr()
