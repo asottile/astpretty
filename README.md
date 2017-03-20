@@ -18,7 +18,7 @@ astpretty is intended to be a replacement for `ast.dump`.
 `astpretty` provides two api functions:
 
 
-### `astpretty.pprint(node, indent='    ')`
+### `astpretty.pprint(node, indent=FOUR_SPACE_INDENT)`
 
 Print a representation of the ast node.
 
@@ -63,7 +63,7 @@ If(
 ```
 
 
-### `astpretty.pformat(node, indent='    ')`
+### `astpretty.pformat(node, indent=FOUR_SPACE_INDENT)`
 
 Return a string representation of the ast node.
 
