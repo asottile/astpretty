@@ -27,7 +27,20 @@ def _is_leaf(node):
 
 def pformat(node, indent='    ', _indent=0):
     if _is_leaf(node):
-        return ast.dump(node)
+        if hasattr(node, 'lineno'):
+            ret = ast.dump(node)
+            # For nodes like Pass() which have information but no data
+            if ret.endswith('()'):
+                info = '(lineno={}, col_offset={}'.format(
+                    node.lineno, node.col_offset,
+                )
+            else:
+                info = '(lineno={}, col_offset={}, '.format(
+                    node.lineno, node.col_offset,
+                )
+            return ret.replace('(', info, 1)
+        else:
+            return ast.dump(node)
     else:
         class state:
             indent = _indent
@@ -46,7 +59,12 @@ def pformat(node, indent='    ', _indent=0):
 
         out = type(node).__name__ + '(\n'
         with indented():
-            for field in node._fields:
+            if hasattr(node, 'lineno'):
+                fields = ('lineno', 'col_offset') + node._fields
+            else:
+                fields = node._fields
+
+            for field in fields:
                 attr = getattr(node, field)
                 if attr == []:
                     representation = '[]'

@@ -32,15 +32,17 @@ def test_is_leaf_false(s):
 
 def test_pformat_node():
     ret = astpretty.pformat(_to_expr_value('x'))
-    assert ret == "Name(id='x', ctx=Load())"
+    assert ret == "Name(lineno=1, col_offset=0, id='x', ctx=Load())"
 
 
 def test_pformat_nested():
     ret = astpretty.pformat(_to_module_body('x = 5'))
     assert ret == (
         'Assign(\n'
-        "    targets=[Name(id='x', ctx=Store())],\n"
-        '    value=Num(n=5),\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        "    targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],\n"
+        '    value=Num(lineno=1, col_offset=4, n=5),\n'
         ')'
     )
 
@@ -49,8 +51,10 @@ def test_pformat_nested_attr_empty_list():
     ret = astpretty.pformat(_to_module_body('if 1: pass'))
     assert ret == (
         'If(\n'
-        "    test=Num(n=1),\n"
-        '    body=[Pass()],\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        "    test=Num(lineno=1, col_offset=3, n=1),\n"
+        '    body=[Pass(lineno=1, col_offset=6)],\n'
         '    orelse=[],\n'
         ')'
     )
@@ -60,6 +64,8 @@ def test_pformat_mixed_sub_nodes_and_primitives():
     ret = astpretty.pformat(_to_module_body('from y import x'))
     assert ret == (
         'ImportFrom(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
         "    module='y',\n"
         "    names=[alias(name='x', asname=None)],\n"
         '    level=0,\n'
@@ -71,10 +77,12 @@ def test_pformat_nested_multiple_elements():
     ret = astpretty.pformat(_to_expr_value('[1, 2, 3]'))
     assert ret == (
         'List(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
         '    elts=[\n'
-        '        Num(n=1),\n'
-        '        Num(n=2),\n'
-        '        Num(n=3),\n'
+        '        Num(lineno=1, col_offset=1, n=1),\n'
+        '        Num(lineno=1, col_offset=4, n=2),\n'
+        '        Num(lineno=1, col_offset=7, n=3),\n'
         '    ],\n'
         '    ctx=Load(),\n'
         ')'
@@ -85,12 +93,29 @@ def test_pformat_custom_indent():
     ret = astpretty.pformat(_to_expr_value('[1, 2, 3]'), indent='\t')
     assert ret == (
         'List(\n'
+        '\tlineno=1,\n'
+        '\tcol_offset=0,\n'
         '\telts=[\n'
-        '\t\tNum(n=1),\n'
-        '\t\tNum(n=2),\n'
-        '\t\tNum(n=3),\n'
+        '\t\tNum(lineno=1, col_offset=1, n=1),\n'
+        '\t\tNum(lineno=1, col_offset=4, n=2),\n'
+        '\t\tNum(lineno=1, col_offset=7, n=3),\n'
         '\t],\n'
         '\tctx=Load(),\n'
+        ')'
+    )
+
+
+def test_pformat_nested_node_without_line_information():
+    ret = astpretty.pformat(_to_expr_value('a[0]'))
+    assert ret == (
+        'Subscript(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        "    value=Name(lineno=1, col_offset=0, id='a', ctx=Load()),\n"
+        '    slice=Index(\n'
+        '        value=Num(lineno=1, col_offset=2, n=0),\n'
+        '    ),\n'
+        '    ctx=Load(),\n'
         ')'
     )
 
@@ -98,4 +123,4 @@ def test_pformat_custom_indent():
 def test_pprint(capsys):
     astpretty.pprint(_to_expr_value('x'))
     out, _ = capsys.readouterr()
-    assert out == "Name(id='x', ctx=Load())\n"
+    assert out == "Name(lineno=1, col_offset=0, id='x', ctx=Load())\n"
