@@ -25,16 +25,22 @@ Print a representation of the ast node.
 ```python
 >>> astpretty.pprint(ast.parse('if x == y: y += 4').body[0])
 If(
+    lineno=1,
+    col_offset=0,
     test=Compare(
-        left=Name(id='x', ctx=Load()),
+        lineno=1,
+        col_offset=3,
+        left=Name(lineno=1, col_offset=3, id='x', ctx=Load()),
         ops=[Eq()],
-        comparators=[Name(id='y', ctx=Load())],
+        comparators=[Name(lineno=1, col_offset=8, id='y', ctx=Load())],
     ),
     body=[
         AugAssign(
-            target=Name(id='y', ctx=Store()),
+            lineno=1,
+            col_offset=11,
+            target=Name(lineno=1, col_offset=11, id='y', ctx=Store()),
             op=Add(),
-            value=Num(n=4),
+            value=Num(lineno=1, col_offset=16, n=4),
         ),
     ],
     orelse=[],
@@ -46,16 +52,22 @@ If(
 ```python
 >>> astpretty.pprint(ast.parse('if x == y: y += 4').body[0], indent='  ')
 If(
+  lineno=1,
+  col_offset=0,
   test=Compare(
-    left=Name(id='x', ctx=Load()),
+    lineno=1,
+    col_offset=3,
+    left=Name(lineno=1, col_offset=3, id='x', ctx=Load()),
     ops=[Eq()],
-    comparators=[Name(id='y', ctx=Load())],
+    comparators=[Name(lineno=1, col_offset=8, id='y', ctx=Load())],
   ),
   body=[
     AugAssign(
-      target=Name(id='y', ctx=Store()),
+      lineno=1,
+      col_offset=11,
+      target=Name(lineno=1, col_offset=11, id='y', ctx=Store()),
       op=Add(),
-      value=Num(n=4),
+      value=Num(lineno=1, col_offset=16, n=4),
     ),
   ],
   orelse=[],
@@ -71,7 +83,7 @@ Arguments are identical to `astpretty.pprint`.
 
 ```python
 >>> astpretty.pformat(ast.parse('if x == y: y += 4').body[0])
-"If(\n    test=Compare(\n        left=Name(id='x', ctx=Load()),\n        ops=[Eq()],\n        comparators=[Name(id='y', ctx=Load())],\n    ),\n    body=[\n        AugAssign(\n            target=Name(id='y', ctx=Store()),\n            op=Add(),\n            value=Num(n=4),\n        ),\n    ],\n    orelse=[],\n)"
+"If(\n    lineno=1,\n    col_offset=0,\n    test=Compare(\n        lineno=1,\n        col_offset=3,\n        left=Name(lineno=1, col_offset=3, id='x', ctx=Load()),\n        ops=[Eq()],\n        comparators=[Name(lineno=1, col_offset=8, id='y', ctx=Load())],\n    ),\n    body=[\n        AugAssign(\n            lineno=1,\n            col_offset=11,\n            target=Name(lineno=1, col_offset=11, id='y', ctx=Store()),\n            op=Add(),\n            value=Num(lineno=1, col_offset=16, n=4),\n        ),\n    ],\n    orelse=[],\n)"
 ```
 
 ### Comparison with stdlib `ast.dump`
