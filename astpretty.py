@@ -27,7 +27,9 @@ def _is_leaf(node):
 
 
 def pformat(node, indent='    ', _indent=0):
-    if _is_leaf(node):
+    if node is None:  # pragma: no cover (py35+ unpacking in literals)
+        return repr(node)
+    elif _is_leaf(node):
         if hasattr(node, 'lineno'):
             ret = ast.dump(node)
             # For nodes like Pass() which have information but no data
