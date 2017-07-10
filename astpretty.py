@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import argparse
 import ast
 import contextlib
 
@@ -94,3 +95,17 @@ def pformat(node, indent='    ', _indent=0):
 
 def pprint(*args, **kwargs):
     print(pformat(*args, **kwargs))
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename')
+    args = parser.parse_args(argv)
+
+    with open(args.filename, 'rb') as f:
+        contents = f.read()
+    pprint(ast.parse(contents))
+
+
+if __name__ == '__main__':
+    exit(main())
