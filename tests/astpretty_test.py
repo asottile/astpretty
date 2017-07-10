@@ -124,3 +124,22 @@ def test_pprint(capsys):
     astpretty.pprint(_to_expr_value('x'))
     out, _ = capsys.readouterr()
     assert out == "Name(lineno=1, col_offset=0, id='x', ctx=Load())\n"
+
+
+def test_main(capsys, tmpdir):
+    f = tmpdir.join('test.py')
+    f.write('x = 5\n')
+    astpretty.main((f.strpath,))
+    out, _ = capsys.readouterr()
+    assert out == '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Num(lineno=1, col_offset=4, n=5),
+        ),
+    ],
+)
+'''
