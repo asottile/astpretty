@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import ast
+import sys
 
 import pytest
 
@@ -28,6 +29,25 @@ def test_is_leaf_has_attr_with_list_of_primitives():
 @pytest.mark.parametrize('s', ('a.b', '[4]', 'x()'))
 def test_is_leaf_false(s):
     assert astpretty._is_leaf(_to_expr_value(s)) is False
+
+
+@pytest.mark.xfail(sys.version_info < (3, 5), reason='py35+ syntax only')
+def test_pformat_py35_regression():
+    expected = (
+        'Dict(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        '    keys=[\n'
+        '        Num(lineno=1, col_offset=1, n=1),\n'
+        '        None,\n'
+        '    ],\n'
+        '    values=[\n'
+        '        Num(lineno=1, col_offset=4, n=2),\n'
+        "        Name(lineno=1, col_offset=9, id='k', ctx=Load()),\n"
+        '    ],\n'
+        ')'
+    )
+    assert astpretty.pformat(_to_expr_value('{1: 2, **k}')) == expected
 
 
 def test_pformat_node():
