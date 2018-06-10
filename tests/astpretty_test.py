@@ -67,6 +67,16 @@ def test_pformat_nested():
     )
 
 
+def test_pformat_nested_no_offsets():
+    ret = astpretty.pformat(_to_module_body('x = 5'), show_offsets=False)
+    assert ret == (
+        'Assign(\n'
+        "    targets=[Name(id='x', ctx=Store())],\n"
+        '    value=Num(n=5),\n'
+        ')'
+    )
+
+
 def test_pformat_nested_attr_empty_list():
     ret = astpretty.pformat(_to_module_body('if 1: pass'))
     assert ret == (
@@ -159,6 +169,23 @@ Module(
             col_offset=0,
             targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
             value=Num(lineno=1, col_offset=4, n=5),
+        ),
+    ],
+)
+'''
+
+
+def test_main_hide_offsets(capsys, tmpdir):
+    f = tmpdir.join('test.py')
+    f.write('x = 5\n')
+    astpretty.main((f.strpath, '--no-show-offsets'))
+    out, _ = capsys.readouterr()
+    assert out == '''\
+Module(
+    body=[
+        Assign(
+            targets=[Name(id='x', ctx=Store())],
+            value=Num(n=5),
         ),
     ],
 )

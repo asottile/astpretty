@@ -26,11 +26,11 @@ def _is_leaf(node):
         return True
 
 
-def pformat(node, indent='    ', _indent=0):
+def pformat(node, indent='    ', show_offsets=True, _indent=0):
     if node is None:  # pragma: no cover (py35+ unpacking in literals)
         return repr(node)
     elif _is_leaf(node):
-        if hasattr(node, 'lineno'):
+        if show_offsets and hasattr(node, 'lineno'):
             ret = ast.dump(node)
             # For nodes like Pass() which have information but no data
             if ret.endswith('()'):
@@ -58,11 +58,14 @@ def pformat(node, indent='    ', _indent=0):
             return state.indent * indent
 
         def _pformat(el, _indent=0):
-            return pformat(el, indent=indent, _indent=_indent)
+            return pformat(
+                el, indent=indent, show_offsets=show_offsets,
+                _indent=_indent,
+            )
 
         out = type(node).__name__ + '(\n'
         with indented():
-            if hasattr(node, 'lineno'):
+            if show_offsets and hasattr(node, 'lineno'):
                 fields = ('lineno', 'col_offset') + node._fields
             else:
                 fields = node._fields
@@ -102,11 +105,15 @@ def pprint(*args, **kwargs):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
+    parser.add_argument(
+        '--no-show-offsets', dest='show_offsets',
+        action='store_false',
+    )
     args = parser.parse_args(argv)
 
     with open(args.filename, 'rb') as f:
         contents = f.read()
-    pprint(ast.parse(contents))
+    pprint(ast.parse(contents), show_offsets=args.show_offsets)
 
 
 if __name__ == '__main__':
