@@ -18,7 +18,7 @@ astpretty is intended to be a replacement for `ast.dump`.
 `astpretty` provides two api functions:
 
 
-### `astpretty.pprint(node, indent=FOUR_SPACE_INDENT)`
+### `astpretty.pprint(node, indent=FOUR_SPACE_INDENT, show_offsets=True)`
 
 Print a representation of the ast node.
 
@@ -74,8 +74,18 @@ If(
 )
 ```
 
+`show_offsets` controls whether the output includes line / column information:
 
-### `astpretty.pformat(node, indent=FOUR_SPACE_INDENT)`
+```python
+>>> astpretty.pprint(ast.parse('x += 5').body[0], show_offsets=False)
+AugAssign(
+    target=Name(id='x', ctx=Store()),
+    op=Add(),
+    value=Num(n=5),
+)
+```
+
+### `astpretty.pformat(node, indent=FOUR_SPACE_INDENT, show_offsets=True)`
 
 Return a string representation of the ast node.
 
