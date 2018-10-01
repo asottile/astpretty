@@ -150,6 +150,11 @@ def test_pformat_nested_node_without_line_information():
     )
 
 
+def test_pformat_leaf_node_with_list():
+    ret = astpretty.pformat(_to_module_body('global x, y'))
+    assert ret == "Global(lineno=1, col_offset=0, names=['x', 'y'])"
+
+
 def test_pprint(capsys):
     astpretty.pprint(_to_expr_value('x'))
     out, _ = capsys.readouterr()

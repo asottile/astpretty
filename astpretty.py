@@ -26,24 +26,38 @@ def _is_leaf(node):
         return True
 
 
+def _fields(n, show_offsets=True):
+    if show_offsets and hasattr(n, 'lineno') and hasattr(n, 'col_offset'):
+        return ('lineno', 'col_offset') + n._fields
+    else:
+        return n._fields
+
+
+def _leaf(node, show_offsets=True):
+    if isinstance(node, ast.AST):
+        return '{}({})'.format(
+            type(node).__name__,
+            ', '.join(
+                '{}={}'.format(
+                    field,
+                    _leaf(getattr(node, field), show_offsets=show_offsets),
+                )
+                for field in _fields(node, show_offsets=show_offsets)
+            ),
+        )
+    elif isinstance(node, list):
+        return '[{}]'.format(
+            ', '.join(_leaf(x, show_offsets=show_offsets) for x in node),
+        )
+    else:
+        return repr(node)
+
+
 def pformat(node, indent='    ', show_offsets=True, _indent=0):
     if node is None:  # pragma: no cover (py35+ unpacking in literals)
         return repr(node)
     elif _is_leaf(node):
-        if show_offsets and hasattr(node, 'lineno'):
-            ret = ast.dump(node)
-            # For nodes like Pass() which have information but no data
-            if ret.endswith('()'):
-                info = '(lineno={}, col_offset={}'.format(
-                    node.lineno, node.col_offset,
-                )
-            else:
-                info = '(lineno={}, col_offset={}, '.format(
-                    node.lineno, node.col_offset,
-                )
-            return ret.replace('(', info, 1)
-        else:
-            return ast.dump(node)
+        return _leaf(node, show_offsets=show_offsets)
     else:
         class state:
             indent = _indent
@@ -65,12 +79,7 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
 
         out = type(node).__name__ + '(\n'
         with indented():
-            if show_offsets and hasattr(node, 'lineno'):
-                fields = ('lineno', 'col_offset') + node._fields
-            else:
-                fields = node._fields
-
-            for field in fields:
+            for field in _fields(node, show_offsets=show_offsets):
                 attr = getattr(node, field)
                 if attr == []:
                     representation = '[]'
