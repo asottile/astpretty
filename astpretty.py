@@ -6,11 +6,22 @@ import argparse
 import ast
 import contextlib
 
+AST = (ast.AST,)
+expr_context = (ast.expr_context,)
+
+try:  # pragma: no cover (with typed-ast)
+    from typed_ast import ast27
+    from typed_ast import ast3
+except ImportError:  # pragma: no cover (without typed-ast)
+    typed_support = False
+else:  # pragma: no cover (with typed-ast)
+    AST += (ast27.AST, ast3.AST)
+    expr_context += (ast27.expr_context, ast3.expr_context)
+    typed_support = True
+
 
 def _is_sub_node(node):
-    return (
-        isinstance(node, ast.AST) and not isinstance(node, ast.expr_context)
-    )
+    return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
 def _is_leaf(node):
@@ -34,7 +45,7 @@ def _fields(n, show_offsets=True):
 
 
 def _leaf(node, show_offsets=True):
-    if isinstance(node, ast.AST):
+    if isinstance(node, AST):
         return '{}({})'.format(
             type(node).__name__,
             ', '.join(
@@ -86,7 +97,7 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
                 elif (
                         isinstance(attr, list) and
                         len(attr) == 1 and
-                        isinstance(attr[0], ast.AST) and
+                        isinstance(attr[0], AST) and
                         _is_leaf(attr[0])
                 ):
                     representation = '[{}]'.format(_pformat(attr[0]))
@@ -98,7 +109,7 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
                                 indentstr(), _pformat(el, state.indent),
                             )
                     representation += indentstr() + ']'
-                elif isinstance(attr, ast.AST):
+                elif isinstance(attr, AST):
                     representation = _pformat(attr, state.indent)
                 else:
                     representation = repr(attr)
@@ -118,11 +129,28 @@ def main(argv=None):
         '--no-show-offsets', dest='show_offsets',
         action='store_false',
     )
+    grp = parser.add_mutually_exclusive_group()
+    grp.add_argument(
+        '--untyped', default=ast.parse,
+        dest='parse_func', action='store_const', const=ast.parse,
+        help='(default) Use the stdlib `ast` parser.',
+    )
+    if typed_support:  # pragma: no cover (requires typed-ast)
+        grp.add_argument(
+            '--typed-27',
+            dest='parse_func', action='store_const', const=ast27.parse,
+            help='Use typed_ast.ast27 to parse the ast.',
+        )
+        grp.add_argument(
+            '--typed-3',
+            dest='parse_func', action='store_const', const=ast3.parse,
+            help='Use typed_ast.ast3 to parse the ast.',
+        )
     args = parser.parse_args(argv)
 
     with open(args.filename, 'rb') as f:
         contents = f.read()
-    pprint(ast.parse(contents), show_offsets=args.show_offsets)
+    pprint(args.parse_func(contents), show_offsets=args.show_offsets)
 
 
 if __name__ == '__main__':

@@ -18,4 +18,5 @@ setup(
     ],
     py_modules=['astpretty'],
     entry_points={'console_scripts': ['astpretty = astpretty:main']},
+    extras_require={'typed': ['typed-ast']},
 )

@@ -102,3 +102,54 @@ Arguments are identical to `astpretty.pprint`.
 >>> print(ast.dump(ast.parse('if x == y: y += 4').body[0]))
 If(test=Compare(left=Name(id='x', ctx=Load()), ops=[Eq()], comparators=[Name(id='y', ctx=Load())]), body=[AugAssign(target=Name(id='y', ctx=Store()), op=Add(), value=Num(n=4))], orelse=[])
 ```
+
+### `typed-ast` support
+
+`astpretty` works with [typed-ast](https://github.com/python/typed_ast)!
+
+For usage with `typed-ast` make sure you have `typed-ast` installed, a
+convenient way to do this is with the `typed` extra to `astpretty`:
+
+```bash
+pip install astpretty[typed]
+```
+
+The apis above work equally well with the return values from the `ast` modules
+provided by `typed_ast`:
+
+```pycon
+>>> import astpretty
+>>> from typed_ast import ast3
+>>> astpretty.pprint(ast3.parse('x = 4  # type: int'))
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Num(lineno=1, col_offset=4, n=4),
+            type_comment='int',
+        ),
+    ],
+    type_ignores=[],
+)
+```
+
+With `typed-ast` installed, the commandline interface adds `--typed-27` and
+`--typed-3` options for using the alternative ast parsers:
+
+```console
+$ astpretty --typed-3 t.py
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Num(lineno=1, col_offset=4, n=4),
+            type_comment='int',
+        ),
+    ],
+    type_ignores=[],
+)
+```

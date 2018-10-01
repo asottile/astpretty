@@ -195,3 +195,82 @@ Module(
     ],
 )
 '''
+
+
+def test_typedast_support():
+    assert (sys.version_info >= (3,)) == astpretty.typed_support
+
+
+TYPED_SRC = 'x = 5  # type: int\nx = "foo"  # type: ignore\n'
+TYPED27_OUT = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Num(lineno=1, col_offset=4, n=5),
+            type_comment='int',
+        ),
+        Assign(
+            lineno=2,
+            col_offset=0,
+            targets=[Name(lineno=2, col_offset=0, id='x', ctx=Store())],
+            value=Str(lineno=2, col_offset=4, s=b'foo', has_b=0),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[TypeIgnore(lineno=2)],
+)
+'''
+TYPED3_OUT = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Num(lineno=1, col_offset=4, n=5),
+            type_comment='int',
+        ),
+        Assign(
+            lineno=2,
+            col_offset=0,
+            targets=[Name(lineno=2, col_offset=0, id='x', ctx=Store())],
+            value=Str(lineno=2, col_offset=4, s='foo'),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[TypeIgnore(lineno=2)],
+)
+'''
+
+
+@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
+def test_typedast_support_27():
+    expected = TYPED27_OUT.rstrip()
+    assert astpretty.pformat(astpretty.ast27.parse(TYPED_SRC)) == expected
+
+
+@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
+def test_typedast_support_3():
+    expected = TYPED3_OUT.rstrip()
+    assert astpretty.pformat(astpretty.ast3.parse(TYPED_SRC)) == expected
+
+
+@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
+def test_typedast_support_cmdline_27(tmpdir, capsys):  # pragma: no cover
+    f = tmpdir.join('f.py')
+    f.write(TYPED_SRC)
+    assert not astpretty.main((str(f), '--typed-27'))
+    out, _ = capsys.readouterr()
+    assert out == TYPED27_OUT
+
+
+@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
+def test_typedast_support_cmdline_3(tmpdir, capsys):  # pragma: no cover
+    f = tmpdir.join('f.py')
+    f.write(TYPED_SRC)
+    assert not astpretty.main((str(f), '--typed-3'))
+    out, _ = capsys.readouterr()
+    assert out == TYPED3_OUT
