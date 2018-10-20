@@ -83,7 +83,7 @@ def test_pformat_nested_attr_empty_list():
         'If(\n'
         '    lineno=1,\n'
         '    col_offset=0,\n'
-        "    test=Num(lineno=1, col_offset=3, n=1),\n"
+        '    test=Num(lineno=1, col_offset=3, n=1),\n'
         '    body=[Pass(lineno=1, col_offset=6)],\n'
         '    orelse=[],\n'
         ')'
