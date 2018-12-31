@@ -67,6 +67,8 @@ def _leaf(node, show_offsets=True):
 def pformat(node, indent='    ', show_offsets=True, _indent=0):
     if node is None:  # pragma: no cover (py35+ unpacking in literals)
         return repr(node)
+    elif isinstance(node, str):  # pragma: no cover (ast27 typed-ast args)
+        return repr(node)
     elif _is_leaf(node):
         return _leaf(node, show_offsets=show_offsets)
     else:

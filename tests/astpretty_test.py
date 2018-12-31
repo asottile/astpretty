@@ -216,7 +216,7 @@ Module(
             lineno=2,
             col_offset=0,
             targets=[Name(lineno=2, col_offset=0, id='x', ctx=Store())],
-            value=Str(lineno=2, col_offset=4, s=b'foo', has_b=0),
+            value=Str(lineno=2, col_offset=4, s=b'foo', kind=''),
             type_comment=None,
         ),
     ],
@@ -237,11 +237,47 @@ Module(
             lineno=2,
             col_offset=0,
             targets=[Name(lineno=2, col_offset=0, id='x', ctx=Store())],
-            value=Str(lineno=2, col_offset=4, s='foo'),
+            value=Str(lineno=2, col_offset=4, s='foo', kind=''),
             type_comment=None,
         ),
     ],
     type_ignores=[TypeIgnore(lineno=2)],
+)
+'''
+FUNC_SRC = '''\
+def f(
+    self,
+    s,  # type: str
+):
+    # type: (...) -> None
+    pass
+'''
+FUNC_SRC_TYPED27_OUT = '''\
+Module(
+    body=[
+        FunctionDef(
+            lineno=1,
+            col_offset=0,
+            name='f',
+            args=arguments(
+                args=[
+                    Name(lineno=2, col_offset=4, id='self', ctx=Param()),
+                    Name(lineno=3, col_offset=4, id='s', ctx=Param()),
+                ],
+                vararg=None,
+                kwarg=None,
+                defaults=[],
+                type_comments=[
+                    None,
+                    'str',
+                ],
+            ),
+            body=[Pass(lineno=6, col_offset=4)],
+            decorator_list=[],
+            type_comment='(...) -> None',
+        ),
+    ],
+    type_ignores=[],
 )
 '''
 
@@ -256,6 +292,12 @@ def test_typedast_support_27():
 def test_typedast_support_3():
     expected = TYPED3_OUT.rstrip()
     assert astpretty.pformat(astpretty.ast3.parse(TYPED_SRC)) == expected
+
+
+@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
+def test_typedast_ast27_arguments():
+    expected = FUNC_SRC_TYPED27_OUT.strip()
+    assert astpretty.pformat(astpretty.ast27.parse(FUNC_SRC)) == expected
 
 
 @pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
