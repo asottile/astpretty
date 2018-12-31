@@ -4,7 +4,7 @@ setup(
     name='astpretty',
     description='Pretty print the output of python stdlib `ast.parse`.',
     url='https://github.com/asottile/astpretty',
-    version='1.4.0',
+    version='1.4.1',
     author='Anthony Sottile',
     author_email='asottile@umich.edu',
     classifiers=[
