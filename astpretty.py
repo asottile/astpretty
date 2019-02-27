@@ -38,8 +38,8 @@ def _is_leaf(node):
 
 
 def _fields(n, show_offsets=True):
-    if show_offsets and hasattr(n, 'lineno') and hasattr(n, 'col_offset'):
-        return ('lineno', 'col_offset') + n._fields
+    if show_offsets:
+        return n._attributes + n._fields
     else:
         return n._fields
 
