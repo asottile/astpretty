@@ -220,7 +220,7 @@ Module(
             type_comment=None,
         ),
     ],
-    type_ignores=[TypeIgnore(lineno=2)],
+    type_ignores=[TypeIgnore(lineno=2, tag='')],
 )
 '''
 TYPED3_OUT = '''\
@@ -241,7 +241,7 @@ Module(
             type_comment=None,
         ),
     ],
-    type_ignores=[TypeIgnore(lineno=2)],
+    type_ignores=[TypeIgnore(lineno=2, tag='')],
 )
 '''
 FUNC_SRC = '''\
