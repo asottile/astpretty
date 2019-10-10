@@ -198,7 +198,8 @@ Module(
 
 
 def test_typedast_support():
-    assert (sys.version_info >= (3,)) == astpretty.typed_support
+    typed = sys.version_info >= (3,) and not hasattr(sys, 'pypy_version_info')
+    assert typed == astpretty.typed_support
 
 
 TYPED_SRC = 'x = 5  # type: int\nx = "foo"  # type: ignore\n'
