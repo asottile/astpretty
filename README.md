@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/asottile/astpretty.svg?branch=master)](https://travis-ci.org/asottile/astpretty)
-[![Coverage Status](https://coveralls.io/repos/github/asottile/astpretty/badge.svg?branch=master)](https://coveralls.io/github/asottile/astpretty?branch=master)
+[![Build Status](https://dev.azure.com/asottile/asottile/_apis/build/status/asottile.astpretty?branchName=master)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=35&branchName=master)
+[![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/asottile/asottile/35/master.svg)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=35&branchName=master)
 
 astpretty
 =========
