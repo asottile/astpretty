@@ -35,29 +35,38 @@ def test_is_leaf_false(s):
 def test_pformat_py35_regression():
     expected = (
         'Dict(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
         '    keys=[\n'
-        '        Num(lineno=1, col_offset=1, n=1),\n'
+        "        Name(id='a', ctx=Load()),\n"
         '        None,\n'
         '    ],\n'
         '    values=[\n'
-        '        Num(lineno=1, col_offset=4, n=2),\n'
-        "        Name(lineno=1, col_offset=9, id='k', ctx=Load()),\n"
+        "        Name(id='b', ctx=Load()),\n"
+        "        Name(id='k', ctx=Load()),\n"
         '    ],\n'
         ')'
     )
-    assert astpretty.pformat(_to_expr_value('{1: 2, **k}')) == expected
+    s = '{a: b, **k}'
+    assert astpretty.pformat(_to_expr_value(s), show_offsets=False) == expected
 
 
 def test_pformat_node():
-    ret = astpretty.pformat(_to_expr_value('x'))
-    assert ret == "Name(lineno=1, col_offset=0, id='x', ctx=Load())"
+    ret = astpretty.pformat(_to_expr_value('x'), show_offsets=False)
+    assert ret == "Name(id='x', ctx=Load())"
 
 
-def test_pformat_nested():
-    ret = astpretty.pformat(_to_module_body('x = 5'))
-    assert ret == (
+def test_pformat_nested_with_offsets():
+    expected_38 = (
+        'Assign(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        '    end_lineno=1,\n'
+        '    end_col_offset=5,\n'
+        "    targets=[Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='x', ctx=Store())],\n"  # noqa: E501
+        '    value=Constant(lineno=1, col_offset=4, end_lineno=1, end_col_offset=5, value=5, kind=None),\n'  # noqa: E501
+        '    type_comment=None,\n'
+        ')'
+    )
+    expected_lt38 = (
         'Assign(\n'
         '    lineno=1,\n'
         '    col_offset=0,\n'
@@ -65,37 +74,27 @@ def test_pformat_nested():
         '    value=Num(lineno=1, col_offset=4, n=5),\n'
         ')'
     )
-
-
-def test_pformat_nested_no_offsets():
-    ret = astpretty.pformat(_to_module_body('x = 5'), show_offsets=False)
-    assert ret == (
-        'Assign(\n'
-        "    targets=[Name(id='x', ctx=Store())],\n"
-        '    value=Num(n=5),\n'
-        ')'
-    )
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    ret = astpretty.pformat(_to_module_body('x = 5'))
+    assert ret == expected
 
 
 def test_pformat_nested_attr_empty_list():
-    ret = astpretty.pformat(_to_module_body('if 1: pass'))
+    ret = astpretty.pformat(_to_module_body('if x: pass'), show_offsets=False)
     assert ret == (
         'If(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
-        '    test=Num(lineno=1, col_offset=3, n=1),\n'
-        '    body=[Pass(lineno=1, col_offset=6)],\n'
+        "    test=Name(id='x', ctx=Load()),\n"
+        '    body=[Pass()],\n'
         '    orelse=[],\n'
         ')'
     )
 
 
 def test_pformat_mixed_sub_nodes_and_primitives():
-    ret = astpretty.pformat(_to_module_body('from y import x'))
+    node = _to_module_body('from y import x')
+    ret = astpretty.pformat(node, show_offsets=False)
     assert ret == (
         'ImportFrom(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
         "    module='y',\n"
         "    names=[alias(name='x', asname=None)],\n"
         '    level=0,\n'
@@ -104,15 +103,13 @@ def test_pformat_mixed_sub_nodes_and_primitives():
 
 
 def test_pformat_nested_multiple_elements():
-    ret = astpretty.pformat(_to_expr_value('[1, 2, 3]'))
+    ret = astpretty.pformat(_to_expr_value('[a, b, c]'), show_offsets=False)
     assert ret == (
         'List(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
         '    elts=[\n'
-        '        Num(lineno=1, col_offset=1, n=1),\n'
-        '        Num(lineno=1, col_offset=4, n=2),\n'
-        '        Num(lineno=1, col_offset=7, n=3),\n'
+        "        Name(id='a', ctx=Load()),\n"
+        "        Name(id='b', ctx=Load()),\n"
+        "        Name(id='c', ctx=Load()),\n"
         '    ],\n'
         '    ctx=Load(),\n'
         ')'
@@ -120,15 +117,14 @@ def test_pformat_nested_multiple_elements():
 
 
 def test_pformat_custom_indent():
-    ret = astpretty.pformat(_to_expr_value('[1, 2, 3]'), indent='\t')
+    node = _to_expr_value('[a, b, c]')
+    ret = astpretty.pformat(node, indent='\t', show_offsets=False)
     assert ret == (
         'List(\n'
-        '\tlineno=1,\n'
-        '\tcol_offset=0,\n'
         '\telts=[\n'
-        '\t\tNum(lineno=1, col_offset=1, n=1),\n'
-        '\t\tNum(lineno=1, col_offset=4, n=2),\n'
-        '\t\tNum(lineno=1, col_offset=7, n=3),\n'
+        "\t\tName(id='a', ctx=Load()),\n"
+        "\t\tName(id='b', ctx=Load()),\n"
+        "\t\tName(id='c', ctx=Load()),\n"
         '\t],\n'
         '\tctx=Load(),\n'
         ')'
@@ -136,8 +132,20 @@ def test_pformat_custom_indent():
 
 
 def test_pformat_nested_node_without_line_information():
-    ret = astpretty.pformat(_to_expr_value('a[0]'))
-    assert ret == (
+    expected_38 = (
+        'Subscript(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        '    end_lineno=1,\n'
+        '    end_col_offset=4,\n'
+        "    value=Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='a', ctx=Load()),\n"  # noqa: E501
+        '    slice=Index(\n'
+        '        value=Constant(lineno=1, col_offset=2, end_lineno=1, end_col_offset=3, value=0, kind=None),\n'  # noqa: E501
+        '    ),\n'
+        '    ctx=Load(),\n'
+        ')'
+    )
+    expected_lt38 = (
         'Subscript(\n'
         '    lineno=1,\n'
         '    col_offset=0,\n'
@@ -148,53 +156,88 @@ def test_pformat_nested_node_without_line_information():
         '    ctx=Load(),\n'
         ')'
     )
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    ret = astpretty.pformat(_to_expr_value('a[0]'))
+    assert ret == expected
 
 
 def test_pformat_leaf_node_with_list():
-    ret = astpretty.pformat(_to_module_body('global x, y'))
-    assert ret == "Global(lineno=1, col_offset=0, names=['x', 'y'])"
+    ret = astpretty.pformat(_to_module_body('global x, y'), show_offsets=False)
+    assert ret == "Global(names=['x', 'y'])"
 
 
 def test_pprint(capsys):
-    astpretty.pprint(_to_expr_value('x'))
+    astpretty.pprint(_to_expr_value('x'), show_offsets=False)
     out, _ = capsys.readouterr()
-    assert out == "Name(lineno=1, col_offset=0, id='x', ctx=Load())\n"
+    assert out == "Name(id='x', ctx=Load())\n"
 
 
-def test_main(capsys, tmpdir):
-    f = tmpdir.join('test.py')
-    f.write('x = 5\n')
-    astpretty.main((f.strpath,))
-    out, _ = capsys.readouterr()
-    assert out == '''\
+def test_main_with_offsets(capsys, tmpdir):
+    expected_38 = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            end_lineno=1,
+            end_col_offset=5,
+            targets=[Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='x', ctx=Store())],
+            value=Name(lineno=1, col_offset=4, end_lineno=1, end_col_offset=5, id='y', ctx=Load()),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[],
+)
+'''  # noqa: E501
+    expected_lt38 = '''\
 Module(
     body=[
         Assign(
             lineno=1,
             col_offset=0,
             targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
-            value=Num(lineno=1, col_offset=4, n=5),
+            value=Name(lineno=1, col_offset=4, id='y', ctx=Load()),
         ),
     ],
 )
 '''
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    f = tmpdir.join('test.py')
+    f.write('x = y\n')
+    astpretty.main((f.strpath,))
+    out, _ = capsys.readouterr()
+    assert out == expected
 
 
 def test_main_hide_offsets(capsys, tmpdir):
-    f = tmpdir.join('test.py')
-    f.write('x = 5\n')
-    astpretty.main((f.strpath, '--no-show-offsets'))
-    out, _ = capsys.readouterr()
-    assert out == '''\
+    expected_38 = '''\
 Module(
     body=[
         Assign(
             targets=[Name(id='x', ctx=Store())],
-            value=Num(n=5),
+            value=Name(id='y', ctx=Load()),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[],
+)
+'''
+    expected_lt38 = '''\
+Module(
+    body=[
+        Assign(
+            targets=[Name(id='x', ctx=Store())],
+            value=Name(id='y', ctx=Load()),
         ),
     ],
 )
 '''
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    f = tmpdir.join('test.py')
+    f.write('x = y\n')
+    astpretty.main((f.strpath, '--no-show-offsets'))
+    out, _ = capsys.readouterr()
+    assert out == expected
 
 
 def test_typedast_support():
@@ -317,3 +360,35 @@ def test_typedast_support_cmdline_3(tmpdir, capsys):  # pragma: no cover
     assert not astpretty.main((str(f), '--typed-3'))
     out, _ = capsys.readouterr()
     assert out == TYPED3_OUT
+
+
+@pytest.mark.xfail(sys.version_info < (3, 8), reason='py38+ syntax only')
+def test_pformat_py38_type_comments(tmpdir, capsys):
+    expected = '''\
+Module(
+    body=[
+        FunctionDef(
+            lineno=1,
+            col_offset=0,
+            end_lineno=2,
+            end_col_offset=8,
+            name='f',
+            args=arguments(posonlyargs=[], args=[], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
+            body=[Pass(lineno=2, col_offset=4, end_lineno=2, end_col_offset=8)],
+            decorator_list=[],
+            returns=None,
+            type_comment='() -> None',
+        ),
+    ],
+    type_ignores=[TypeIgnore(lineno=2, tag='')],
+)
+'''  # noqa: E501
+    mod = (
+        'def f():  # type: () -> None\n'
+        '    pass  # type: ignore\n'
+    )
+    f = tmpdir.join('test.py')
+    f.write(mod)
+    astpretty.main((f.strpath,))
+    out, _ = capsys.readouterr()
+    assert out == expected

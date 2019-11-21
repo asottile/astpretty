@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import argparse
 import ast
 import contextlib
+import sys
 
 AST = (ast.AST,)
 expr_context = (ast.expr_context,)
@@ -150,9 +151,15 @@ def main(argv=None):
         )
     args = parser.parse_args(argv)
 
+    type_comments = args.parse_func is ast.parse and sys.version_info >= (3, 8)
+    if type_comments:  # pragma: no cover (py38+)
+        kwargs = {'type_comments': True}
+    else:  # pragma: no cover (<py38)
+        kwargs = {}
+
     with open(args.filename, 'rb') as f:
         contents = f.read()
-    pprint(args.parse_func(contents), show_offsets=args.show_offsets)
+    pprint(args.parse_func(contents, **kwargs), show_offsets=args.show_offsets)
 
 
 if __name__ == '__main__':
