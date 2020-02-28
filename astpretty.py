@@ -1,14 +1,17 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import ast
 import contextlib
 import sys
+from typing import Any
+from typing import Generator
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Type
+from typing import Union
 
-AST = (ast.AST,)
-expr_context = (ast.expr_context,)
+AST: Tuple[Type[Any], ...] = (ast.AST,)
+expr_context: Tuple[Type[Any], ...] = (ast.expr_context,)
 
 try:  # pragma: no cover (with typed-ast)
     from typed_ast import ast27
@@ -21,11 +24,11 @@ else:  # pragma: no cover (with typed-ast)
     typed_support = True
 
 
-def _is_sub_node(node):
+def _is_sub_node(node: Any) -> bool:
     return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
-def _is_leaf(node):
+def _is_leaf(node: ast.AST) -> bool:
     for field in node._fields:
         attr = getattr(node, field)
         if _is_sub_node(attr):
@@ -38,14 +41,14 @@ def _is_leaf(node):
         return True
 
 
-def _fields(n, show_offsets=True):
+def _fields(n: ast.AST, show_offsets: bool = True) -> Tuple[str, ...]:
     if show_offsets:
         return n._attributes + n._fields
     else:
         return n._fields
 
 
-def _leaf(node, show_offsets=True):
+def _leaf(node: ast.AST, show_offsets: bool = True) -> str:
     if isinstance(node, AST):
         return '{}({})'.format(
             type(node).__name__,
@@ -65,8 +68,13 @@ def _leaf(node, show_offsets=True):
         return repr(node)
 
 
-def pformat(node, indent='    ', show_offsets=True, _indent=0):
-    if node is None:  # pragma: no cover (py35+ unpacking in literals)
+def pformat(
+        node: Union[ast.AST, None, str],
+        indent: str = '    ',
+        show_offsets: bool = True,
+        _indent: int = 0,
+) -> str:
+    if node is None:
         return repr(node)
     elif isinstance(node, str):  # pragma: no cover (ast27 typed-ast args)
         return repr(node)
@@ -77,15 +85,15 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
             indent = _indent
 
         @contextlib.contextmanager
-        def indented():
+        def indented() -> Generator[None, None, None]:
             state.indent += 1
             yield
             state.indent -= 1
 
-        def indentstr():
+        def indentstr() -> str:
             return state.indent * indent
 
-        def _pformat(el, _indent=0):
+        def _pformat(el: Union[ast.AST, None, str], _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
                 _indent=_indent,
@@ -103,7 +111,7 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
                         isinstance(attr[0], AST) and
                         _is_leaf(attr[0])
                 ):
-                    representation = '[{}]'.format(_pformat(attr[0]))
+                    representation = f'[{_pformat(attr[0])}]'
                 elif isinstance(attr, list):
                     representation = '[\n'
                     with indented():
@@ -116,16 +124,16 @@ def pformat(node, indent='    ', show_offsets=True, _indent=0):
                     representation = _pformat(attr, state.indent)
                 else:
                     representation = repr(attr)
-                out += '{}{}={},\n'.format(indentstr(), field, representation)
+                out += f'{indentstr()}{field}={representation},\n'
         out += indentstr() + ')'
         return out
 
 
-def pprint(*args, **kwargs):
+def pprint(*args: Any, **kwargs: Any) -> None:
     print(pformat(*args, **kwargs))
 
 
-def main(argv=None):
+def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     parser.add_argument(
@@ -160,6 +168,7 @@ def main(argv=None):
     with open(args.filename, 'rb') as f:
         contents = f.read()
     pprint(args.parse_func(contents, **kwargs), show_offsets=args.show_offsets)
+    return 0
 
 
 if __name__ == '__main__':

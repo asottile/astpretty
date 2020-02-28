@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import ast
 import sys
 
@@ -31,7 +28,6 @@ def test_is_leaf_false(s):
     assert astpretty._is_leaf(_to_expr_value(s)) is False
 
 
-@pytest.mark.xfail(sys.version_info < (3, 5), reason='py35+ syntax only')
 def test_pformat_py35_regression():
     expected = (
         'Dict(\n'
@@ -241,7 +237,7 @@ Module(
 
 
 def test_typedast_support():
-    typed = sys.version_info >= (3,) and not hasattr(sys, 'pypy_version_info')
+    typed = not hasattr(sys, 'pypy_version_info')
     assert typed == astpretty.typed_support
 
 
