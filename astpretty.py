@@ -8,11 +8,16 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
+from typing import TYPE_CHECKING
 from typing import Union
+
+if TYPE_CHECKING:
+    from typed_ast import ast27
+    from typed_ast import ast3
+    ASTType = Union[ast.AST, ast27.AST, ast3.AST]
 
 AST: Tuple[Type[Any], ...] = (ast.AST,)
 expr_context: Tuple[Type[Any], ...] = (ast.expr_context,)
-
 try:  # pragma: no cover (with typed-ast)
     from typed_ast import ast27
     from typed_ast import ast3
@@ -28,7 +33,7 @@ def _is_sub_node(node: Any) -> bool:
     return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
-def _is_leaf(node: ast.AST) -> bool:
+def _is_leaf(node: 'ASTType') -> bool:
     for field in node._fields:
         attr = getattr(node, field)
         if _is_sub_node(attr):
@@ -41,14 +46,14 @@ def _is_leaf(node: ast.AST) -> bool:
         return True
 
 
-def _fields(n: ast.AST, show_offsets: bool = True) -> Tuple[str, ...]:
+def _fields(n: 'ASTType', show_offsets: bool = True) -> Tuple[str, ...]:
     if show_offsets:
         return n._attributes + n._fields
     else:
         return n._fields
 
 
-def _leaf(node: ast.AST, show_offsets: bool = True) -> str:
+def _leaf(node: 'ASTType', show_offsets: bool = True) -> str:
     if isinstance(node, AST):
         return '{}({})'.format(
             type(node).__name__,
@@ -69,7 +74,7 @@ def _leaf(node: ast.AST, show_offsets: bool = True) -> str:
 
 
 def pformat(
-        node: Union[ast.AST, None, str],
+        node: Union['ASTType', None, str],
         indent: str = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
@@ -93,7 +98,7 @@ def pformat(
         def indentstr() -> str:
             return state.indent * indent
 
-        def _pformat(el: Union[ast.AST, None, str], _indent: int = 0) -> str:
+        def _pformat(el: Union['ASTType', None, str], _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
                 _indent=_indent,
