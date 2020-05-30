@@ -1,4 +1,5 @@
 import ast
+import subprocess
 import sys
 
 import pytest
@@ -166,6 +167,82 @@ def test_pprint(capsys):
     astpretty.pprint(_to_expr_value('x'), show_offsets=False)
     out, _ = capsys.readouterr()
     assert out == "Name(id='x', ctx=Load())\n"
+
+
+def test_main_with_filename(capsys, tmpdir):
+    expected_38 = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            end_lineno=1,
+            end_col_offset=5,
+            targets=[Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='x', ctx=Store())],
+            value=Name(lineno=1, col_offset=4, end_lineno=1, end_col_offset=5, id='y', ctx=Load()),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[],
+)
+'''  # noqa: E501
+    expected_lt38 = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Name(lineno=1, col_offset=4, id='y', ctx=Load()),
+        ),
+    ],
+)
+'''
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    f = tmpdir.join('test.py')
+    f.write('x = y\n')
+    astpretty.main((f.strpath,))
+    out, _ = capsys.readouterr()
+    assert out == expected
+
+
+def test_main_with_string_pipe(capsys, tmpdir):
+    expected_38 = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            end_lineno=1,
+            end_col_offset=5,
+            targets=[Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='x', ctx=Store())],
+            value=Name(lineno=1, col_offset=4, end_lineno=1, end_col_offset=5, id='y', ctx=Load()),
+            type_comment=None,
+        ),
+    ],
+    type_ignores=[],
+)
+'''  # noqa: E501
+    expected_lt38 = '''\
+Module(
+    body=[
+        Assign(
+            lineno=1,
+            col_offset=0,
+            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
+            value=Name(lineno=1, col_offset=4, id='y', ctx=Load()),
+        ),
+    ],
+)
+'''
+    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    result = subprocess.run(
+        ['astpretty'],
+        input='x = y\n',
+        encoding='ascii',
+        capture_output=True,
+    )
+    assert result.stdout == expected
 
 
 def test_main_with_offsets(capsys, tmpdir):

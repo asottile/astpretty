@@ -140,7 +140,7 @@ def pprint(*args: Any, **kwargs: Any) -> None:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename')
+    parser.add_argument('filename', nargs='?')
     parser.add_argument(
         '--no-show-offsets', dest='show_offsets',
         action='store_false',
@@ -170,8 +170,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:  # pragma: no cover (<py38)
         kwargs = {}
 
-    with open(args.filename, 'rb') as f:
-        contents = f.read()
+    if args.filename:
+        with open(args.filename, 'rb') as f:
+            contents = f.read()
+    elif not sys.stdin.isatty():
+        contents = sys.stdin.read().encode('utf-8')
+    else:
+        parser.print_help()
+
     pprint(args.parse_func(contents, **kwargs), show_offsets=args.show_offsets)
     return 0
 
