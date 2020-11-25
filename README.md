@@ -2,7 +2,7 @@
 [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/asottile/asottile/35/master.svg)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=35&branchName=master)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/asottile/astpretty/master.svg)](https://results.pre-commit.ci/latest/github/asottile/astpretty/master)
 
-astpretty
+astpretty - AWESOME LIBRARY  
 =========
 
 Pretty print the output of python stdlib `ast.parse`.
