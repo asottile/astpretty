@@ -127,6 +127,21 @@ def test_pformat_custom_indent():
     )
 
 
+def test_pformat_integer_indent():
+    node = _to_expr_value('[a, b, c]')
+    ret = astpretty.pformat(node, indent=3, show_offsets=False)
+    assert ret == (
+        'List(\n'
+        '   elts=[\n'
+        "      Name(id='a', ctx=Load()),\n"
+        "      Name(id='b', ctx=Load()),\n"
+        "      Name(id='c', ctx=Load()),\n"
+        '   ],\n'
+        '   ctx=Load(),\n'
+        ')'
+    )
+
+
 def test_pformat_nested_node_without_line_information():
     expected_38 = (
         'Subscript(\n'
