@@ -75,7 +75,7 @@ def _leaf(node: 'ASTType', show_offsets: bool = True) -> str:
 
 def pformat(
         node: Union['ASTType', None, str],
-        indent: str = '    ',
+        indent: Union[str, int] = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
 ) -> str:
@@ -86,6 +86,11 @@ def pformat(
     elif _is_leaf(node):
         return _leaf(node, show_offsets=show_offsets)
     else:
+        if isinstance(indent, int):
+            indent_s = indent * ' '
+        else:
+            indent_s = indent
+
         class state:
             indent = _indent
 
@@ -96,7 +101,7 @@ def pformat(
             state.indent -= 1
 
         def indentstr() -> str:
-            return state.indent * indent
+            return state.indent * indent_s
 
         def _pformat(el: Union['ASTType', None, str], _indent: int = 0) -> str:
             return pformat(
