@@ -143,6 +143,17 @@ def test_pformat_integer_indent():
 
 
 def test_pformat_nested_node_without_line_information():
+    expected_39 = (
+        'Subscript(\n'
+        '    lineno=1,\n'
+        '    col_offset=0,\n'
+        '    end_lineno=1,\n'
+        '    end_col_offset=4,\n'
+        "    value=Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='a', ctx=Load()),\n"  # noqa: E501
+        '    slice=Constant(lineno=1, col_offset=2, end_lineno=1, end_col_offset=3, value=0, kind=None),\n'  # noqa: E501
+        '    ctx=Load(),\n'
+        ')'
+    )
     expected_38 = (
         'Subscript(\n'
         '    lineno=1,\n'
@@ -167,7 +178,11 @@ def test_pformat_nested_node_without_line_information():
         '    ctx=Load(),\n'
         ')'
     )
-    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
+    expected = (
+        expected_39 if sys.version_info >= (3, 9) else
+        expected_38 if sys.version_info >= (3, 8) else
+        expected_lt38
+    )
     ret = astpretty.pformat(_to_expr_value('a[0]'))
     assert ret == expected
 
