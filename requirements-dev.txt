@@ -1,3 +1,4 @@
 covdefaults
 coverage
 pytest
+typed-ast;implementation_name=="cpython"
