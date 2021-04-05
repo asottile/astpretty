@@ -29,7 +29,7 @@ else:  # pragma: no cover (with typed-ast)
     typed_support = True
 
 
-def _is_sub_node(node: Any) -> bool:
+def _is_sub_node(node: object) -> bool:
     return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
