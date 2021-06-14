@@ -42,4 +42,3 @@ repos:
     hooks:
     -   id: mypy
         additional_dependencies: [types-all]
-
