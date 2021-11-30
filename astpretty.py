@@ -170,9 +170,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     type_comments = args.parse_func is ast.parse and sys.version_info >= (3, 8)
-    if type_comments:  # pragma: no cover (py38+)
+    if type_comments:  # pragma: >=3.8 cover
         kwargs = {'type_comments': True}
-    else:  # pragma: no cover (<py38)
+    else:  # pragma: <3.8 cover
         kwargs = {}
 
     with open(args.filename, 'rb') as f:
