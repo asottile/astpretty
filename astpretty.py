@@ -1,13 +1,12 @@
+from __future__ import annotations
+
 import argparse
 import ast
 import contextlib
 import sys
 from typing import Any
 from typing import Generator
-from typing import Optional
 from typing import Sequence
-from typing import Tuple
-from typing import Type
 from typing import TYPE_CHECKING
 from typing import Union
 
@@ -16,8 +15,8 @@ if TYPE_CHECKING:
     from typed_ast import ast3
     ASTType = Union[ast.AST, ast27.AST, ast3.AST]
 
-AST: Tuple[Type[Any], ...] = (ast.AST,)
-expr_context: Tuple[Type[Any], ...] = (ast.expr_context,)
+AST: tuple[type[Any], ...] = (ast.AST,)
+expr_context: tuple[type[Any], ...] = (ast.expr_context,)
 try:  # pragma: no cover (with typed-ast)
     from typed_ast import ast27
     from typed_ast import ast3
@@ -33,7 +32,7 @@ def _is_sub_node(node: object) -> bool:
     return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
-def _is_leaf(node: 'ASTType') -> bool:
+def _is_leaf(node: ASTType) -> bool:
     for field in node._fields:
         attr = getattr(node, field)
         if _is_sub_node(attr):
@@ -46,14 +45,14 @@ def _is_leaf(node: 'ASTType') -> bool:
         return True
 
 
-def _fields(n: 'ASTType', show_offsets: bool = True) -> Tuple[str, ...]:
+def _fields(n: ASTType, show_offsets: bool = True) -> tuple[str, ...]:
     if show_offsets:
         return n._attributes + n._fields
     else:
         return n._fields
 
 
-def _leaf(node: 'ASTType', show_offsets: bool = True) -> str:
+def _leaf(node: ASTType, show_offsets: bool = True) -> str:
     if isinstance(node, AST):
         return '{}({})'.format(
             type(node).__name__,
@@ -74,8 +73,8 @@ def _leaf(node: 'ASTType', show_offsets: bool = True) -> str:
 
 
 def pformat(
-        node: Union['ASTType', None, str],
-        indent: Union[str, int] = '    ',
+        node: ASTType | None | str,
+        indent: str | int = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
 ) -> str:
@@ -103,7 +102,7 @@ def pformat(
         def indentstr() -> str:
             return state.indent * indent_s
 
-        def _pformat(el: Union['ASTType', None, str], _indent: int = 0) -> str:
+        def _pformat(el: ASTType | None | str, _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
                 _indent=_indent,
@@ -143,7 +142,7 @@ def pprint(*args: Any, **kwargs: Any) -> None:
     print(pformat(*args, **kwargs))
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     parser.add_argument(
