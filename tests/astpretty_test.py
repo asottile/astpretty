@@ -53,7 +53,7 @@ def test_pformat_node():
 
 
 def test_pformat_nested_with_offsets():
-    expected_38 = (
+    expected = (
         'Assign(\n'
         '    lineno=1,\n'
         '    col_offset=0,\n'
@@ -64,15 +64,6 @@ def test_pformat_nested_with_offsets():
         '    type_comment=None,\n'
         ')'
     )
-    expected_lt38 = (
-        'Assign(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
-        "    targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],\n"
-        '    value=Num(lineno=1, col_offset=4, n=5),\n'
-        ')'
-    )
-    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
     ret = astpretty.pformat(_to_module_body('x = 5'))
     assert ret == expected
 
@@ -169,22 +160,7 @@ def test_pformat_nested_node_without_line_information():
         '    ctx=Load(),\n'
         ')'
     )
-    expected_lt38 = (
-        'Subscript(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
-        "    value=Name(lineno=1, col_offset=0, id='a', ctx=Load()),\n"
-        '    slice=Index(\n'
-        '        value=Num(lineno=1, col_offset=2, n=0),\n'
-        '    ),\n'
-        '    ctx=Load(),\n'
-        ')'
-    )
-    expected = (
-        expected_39 if sys.version_info >= (3, 9) else
-        expected_38 if sys.version_info >= (3, 8) else
-        expected_lt38
-    )
+    expected = expected_39 if sys.version_info >= (3, 9) else expected_38
     ret = astpretty.pformat(_to_expr_value('a[0]'))
     assert ret == expected
 
@@ -201,7 +177,7 @@ def test_pprint(capsys):
 
 
 def test_main_with_offsets(capsys, tmpdir):
-    expected_38 = '''\
+    expected = '''\
 Module(
     body=[
         Assign(
@@ -217,19 +193,6 @@ Module(
     type_ignores=[],
 )
 '''  # noqa: E501
-    expected_lt38 = '''\
-Module(
-    body=[
-        Assign(
-            lineno=1,
-            col_offset=0,
-            targets=[Name(lineno=1, col_offset=0, id='x', ctx=Store())],
-            value=Name(lineno=1, col_offset=4, id='y', ctx=Load()),
-        ),
-    ],
-)
-'''
-    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
     f = tmpdir.join('test.py')
     f.write('x = y\n')
     astpretty.main((f.strpath,))
@@ -238,7 +201,7 @@ Module(
 
 
 def test_main_hide_offsets(capsys, tmpdir):
-    expected_38 = '''\
+    expected = '''\
 Module(
     body=[
         Assign(
@@ -250,27 +213,11 @@ Module(
     type_ignores=[],
 )
 '''
-    expected_lt38 = '''\
-Module(
-    body=[
-        Assign(
-            targets=[Name(id='x', ctx=Store())],
-            value=Name(id='y', ctx=Load()),
-        ),
-    ],
-)
-'''
-    expected = expected_38 if sys.version_info >= (3, 8) else expected_lt38
     f = tmpdir.join('test.py')
     f.write('x = y\n')
     astpretty.main((f.strpath, '--no-show-offsets'))
     out, _ = capsys.readouterr()
     assert out == expected
-
-
-def test_typedast_support():
-    typed = not hasattr(sys, 'pypy_version_info')
-    assert typed == astpretty.typed_support
 
 
 TYPED_SRC = 'x = 5  # type: int\nx = "foo"  # type: ignore\n'
@@ -354,43 +301,6 @@ Module(
 '''
 
 
-@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
-def test_typedast_support_27():
-    expected = TYPED27_OUT.rstrip()
-    assert astpretty.pformat(astpretty.ast27.parse(TYPED_SRC)) == expected
-
-
-@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
-def test_typedast_support_3():
-    expected = TYPED3_OUT.rstrip()
-    assert astpretty.pformat(astpretty.ast3.parse(TYPED_SRC)) == expected
-
-
-@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
-def test_typedast_ast27_arguments():
-    expected = FUNC_SRC_TYPED27_OUT.strip()
-    assert astpretty.pformat(astpretty.ast27.parse(FUNC_SRC)) == expected
-
-
-@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
-def test_typedast_support_cmdline_27(tmpdir, capsys):  # pragma: no cover
-    f = tmpdir.join('f.py')
-    f.write(TYPED_SRC)
-    assert not astpretty.main((str(f), '--typed-27'))
-    out, _ = capsys.readouterr()
-    assert out == TYPED27_OUT
-
-
-@pytest.mark.xfail(not astpretty.typed_support, reason='needs typed-ast')
-def test_typedast_support_cmdline_3(tmpdir, capsys):  # pragma: no cover
-    f = tmpdir.join('f.py')
-    f.write(TYPED_SRC)
-    assert not astpretty.main((str(f), '--typed-3'))
-    out, _ = capsys.readouterr()
-    assert out == TYPED3_OUT
-
-
-@pytest.mark.xfail(sys.version_info < (3, 8), reason='py38+ syntax only')
 def test_pformat_py38_type_comments(tmpdir, capsys):
     expected = '''\
 Module(

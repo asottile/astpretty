@@ -3,36 +3,19 @@ from __future__ import annotations
 import argparse
 import ast
 import contextlib
-import sys
 from typing import Any
 from typing import Generator
 from typing import Sequence
-from typing import TYPE_CHECKING
-from typing import Union
-
-if TYPE_CHECKING:
-    from typed_ast import ast27
-    from typed_ast import ast3
-    ASTType = Union[ast.AST, ast27.AST, ast3.AST]
 
 AST: tuple[type[Any], ...] = (ast.AST,)
 expr_context: tuple[type[Any], ...] = (ast.expr_context,)
-try:  # pragma: no cover (with typed-ast)
-    from typed_ast import ast27
-    from typed_ast import ast3
-except ImportError:  # pragma: no cover (without typed-ast)
-    typed_support = False
-else:  # pragma: no cover (with typed-ast)
-    AST += (ast27.AST, ast3.AST)
-    expr_context += (ast27.expr_context, ast3.expr_context)
-    typed_support = True
 
 
 def _is_sub_node(node: object) -> bool:
     return isinstance(node, AST) and not isinstance(node, expr_context)
 
 
-def _is_leaf(node: ASTType) -> bool:
+def _is_leaf(node: ast.AST) -> bool:
     for field in node._fields:
         attr = getattr(node, field)
         if _is_sub_node(attr):
@@ -45,14 +28,14 @@ def _is_leaf(node: ASTType) -> bool:
         return True
 
 
-def _fields(n: ASTType, show_offsets: bool = True) -> tuple[str, ...]:
+def _fields(n: ast.AST, show_offsets: bool = True) -> tuple[str, ...]:
     if show_offsets:
         return n._attributes + n._fields
     else:
         return n._fields
 
 
-def _leaf(node: ASTType, show_offsets: bool = True) -> str:
+def _leaf(node: ast.AST, show_offsets: bool = True) -> str:
     if isinstance(node, AST):
         return '{}({})'.format(
             type(node).__name__,
@@ -73,7 +56,7 @@ def _leaf(node: ASTType, show_offsets: bool = True) -> str:
 
 
 def pformat(
-        node: ASTType | None | str,
+        node: ast.AST | None | str,
         indent: str | int = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
@@ -102,7 +85,7 @@ def pformat(
         def indentstr() -> str:
             return state.indent * indent_s
 
-        def _pformat(el: ASTType | None | str, _indent: int = 0) -> str:
+        def _pformat(el: ast.AST | None | str, _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
                 _indent=_indent,
@@ -149,34 +132,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         '--no-show-offsets', dest='show_offsets',
         action='store_false',
     )
-    grp = parser.add_mutually_exclusive_group()
-    grp.add_argument(
-        '--untyped', default=ast.parse,
-        dest='parse_func', action='store_const', const=ast.parse,
-        help='(default) Use the stdlib `ast` parser.',
-    )
-    if typed_support:  # pragma: no cover (requires typed-ast)
-        grp.add_argument(
-            '--typed-27',
-            dest='parse_func', action='store_const', const=ast27.parse,
-            help='Use typed_ast.ast27 to parse the ast.',
-        )
-        grp.add_argument(
-            '--typed-3',
-            dest='parse_func', action='store_const', const=ast3.parse,
-            help='Use typed_ast.ast3 to parse the ast.',
-        )
     args = parser.parse_args(argv)
-
-    type_comments = args.parse_func is ast.parse and sys.version_info >= (3, 8)
-    if type_comments:  # pragma: >=3.8 cover
-        kwargs = {'type_comments': True}
-    else:  # pragma: <3.8 cover
-        kwargs = {}
 
     with open(args.filename, 'rb') as f:
         contents = f.read()
-    pprint(args.parse_func(contents, **kwargs), show_offsets=args.show_offsets)
+
+    tree = ast.parse(contents, filename=args.filename, type_comments=True)
+    pprint(tree, show_offsets=args.show_offsets)
     return 0
 
 
