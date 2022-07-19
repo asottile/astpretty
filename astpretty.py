@@ -35,21 +35,26 @@ def _fields(n: ast.AST, show_offsets: bool = True) -> tuple[str, ...]:
         return n._fields
 
 
-def _leaf(node: ast.AST, show_offsets: bool = True) -> str:
+def _leaf(
+        node: ast.AST,
+        show_offsets: bool = True,
+        ast_ns_prefix: str | None = ''
+) -> str:
     if isinstance(node, AST):
-        return '{}({})'.format(
+        return '{}{}({})'.format(
+            ast_ns_prefix,
             type(node).__name__,
             ', '.join(
                 '{}={}'.format(
                     field,
-                    _leaf(getattr(node, field), show_offsets=show_offsets),
+                    _leaf(getattr(node, field), show_offsets=show_offsets, ast_ns_prefix=ast_ns_prefix),
                 )
                 for field in _fields(node, show_offsets=show_offsets)
             ),
         )
     elif isinstance(node, list):
         return '[{}]'.format(
-            ', '.join(_leaf(x, show_offsets=show_offsets) for x in node),
+            ', '.join(_leaf(x, show_offsets=show_offsets, ast_ns_prefix=ast_ns_prefix) for x in node),
         )
     else:
         return repr(node)
@@ -60,13 +65,16 @@ def pformat(
         indent: str | int = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
+        ast_ns_prefix: str = ''
 ) -> str:
+    if ast_ns_prefix and ast_ns_prefix[-1] != '.':
+        ast_ns_prefix += '.'
     if node is None:
         return repr(node)
     elif isinstance(node, str):  # pragma: no cover (ast27 typed-ast args)
         return repr(node)
     elif _is_leaf(node):
-        return _leaf(node, show_offsets=show_offsets)
+        return _leaf(node, show_offsets=show_offsets, ast_ns_prefix=ast_ns_prefix)
     else:
         if isinstance(indent, int):
             indent_s = indent * ' '
@@ -88,10 +96,10 @@ def pformat(
         def _pformat(el: ast.AST | None | str, _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
-                _indent=_indent,
+                _indent=_indent, ast_ns_prefix=ast_ns_prefix
             )
 
-        out = type(node).__name__ + '(\n'
+        out = ast_ns_prefix + type(node).__name__ + '(\n'
         with indented():
             for field in _fields(node, show_offsets=show_offsets):
                 attr = getattr(node, field)

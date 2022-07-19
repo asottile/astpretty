@@ -19,7 +19,7 @@ astpretty is intended to be a replacement for `ast.dump`.
 `astpretty` provides two api functions:
 
 
-### `astpretty.pprint(node, indent=FOUR_SPACE_INDENT, show_offsets=True)`
+### `astpretty.pprint(node, indent=FOUR_SPACE_INDENT, show_offsets=True, ast_ns_prefix='')`
 
 Print a representation of the ast node.
 
@@ -83,6 +83,17 @@ AugAssign(
     target=Name(id='x', ctx=Store()),
     op=Add(),
     value=Num(n=5),
+)
+```
+
+`ast_ns_prefix` controls whether objects from the ast module will be prefixed with your ast namespace:
+
+```python
+>>> astpretty.pprint(ast.parse('x += 5').body[0], show_offsets=False, ast_ns_prefix='ast')
+ast.AugAssign(
+    target=ast.Name(id='x', ctx=ast.Store()),
+    op=ast.Add(),
+    value=ast.Num(n=5),
 )
 ```
 
