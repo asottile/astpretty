@@ -38,7 +38,7 @@ def _fields(n: ast.AST, show_offsets: bool = True) -> tuple[str, ...]:
 def _leaf(
         node: ast.AST,
         show_offsets: bool = True,
-        ast_ns_prefix: str | None = ''
+        ast_ns_prefix: str | None = '',
 ) -> str:
     if isinstance(node, AST):
         return '{}{}({})'.format(
@@ -65,7 +65,7 @@ def pformat(
         indent: str | int = '    ',
         show_offsets: bool = True,
         _indent: int = 0,
-        ast_ns_prefix: str = ''
+        ast_ns_prefix: str = '',
 ) -> str:
     if ast_ns_prefix and ast_ns_prefix[-1] != '.':
         ast_ns_prefix += '.'
@@ -96,7 +96,7 @@ def pformat(
         def _pformat(el: ast.AST | None | str, _indent: int = 0) -> str:
             return pformat(
                 el, indent=indent, show_offsets=show_offsets,
-                _indent=_indent, ast_ns_prefix=ast_ns_prefix
+                _indent=_indent, ast_ns_prefix=ast_ns_prefix,
             )
 
         out = ast_ns_prefix + type(node).__name__ + '(\n'
