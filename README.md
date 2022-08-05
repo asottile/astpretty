@@ -11,7 +11,9 @@ astpretty is intended to be a replacement for `ast.dump`.
 
 ## Installation
 
-`pip install astpretty`
+```bash
+pip install astpretty
+```
 
 
 ## Usage
