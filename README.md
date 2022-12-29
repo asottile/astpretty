@@ -1,4 +1,4 @@
-[![build status](https://github.com/asottile/astpretty/actions/astpretty/main.yml/badge.svg)](https://github.com/asottile/astpretty/actions/astpretty/main.yml)
+[![build status](https://github.com/asottile/astpretty/actions/workflows/main.yml/badge.svg)](https://github.com/asottile/astpretty/actions/workflows/main.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/asottile/astpretty/main.svg)](https://results.pre-commit.ci/latest/github/asottile/astpretty/main)
 
 astpretty
