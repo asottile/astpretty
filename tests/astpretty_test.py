@@ -302,7 +302,7 @@ Module(
 
 
 def test_pformat_py38_type_comments(tmpdir, capsys):
-    expected = '''\
+    expected_38 = '''\
 Module(
     body=[
         FunctionDef(
@@ -321,6 +321,27 @@ Module(
     type_ignores=[TypeIgnore(lineno=2, tag='')],
 )
 '''  # noqa: E501
+    expected_312 = '''\
+Module(
+    body=[
+        FunctionDef(
+            lineno=1,
+            col_offset=0,
+            end_lineno=2,
+            end_col_offset=8,
+            name='f',
+            args=arguments(posonlyargs=[], args=[], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
+            body=[Pass(lineno=2, col_offset=4, end_lineno=2, end_col_offset=8)],
+            decorator_list=[],
+            returns=None,
+            type_comment='() -> None',
+            type_params=[],
+        ),
+    ],
+    type_ignores=[TypeIgnore(lineno=2, tag='')],
+)
+'''  # noqa: E501
+    expected = expected_312 if sys.version_info >= (3, 12) else expected_38
     mod = (
         'def f():  # type: () -> None\n'
         '    pass  # type: ignore\n'
