@@ -77,7 +77,7 @@ def pformat(
             indent = _indent
 
         @contextlib.contextmanager
-        def indented() -> Generator[None, None, None]:
+        def indented() -> Generator[None]:
             state.indent += 1
             yield
             state.indent -= 1
