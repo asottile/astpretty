@@ -136,7 +136,7 @@ def test_pformat_integer_indent():
 
 
 def test_pformat_nested_node_without_line_information():
-    expected_39 = (
+    expected = (
         'Subscript(\n'
         '    lineno=1,\n'
         '    col_offset=0,\n'
@@ -147,20 +147,6 @@ def test_pformat_nested_node_without_line_information():
         '    ctx=Load(),\n'
         ')'
     )
-    expected_38 = (
-        'Subscript(\n'
-        '    lineno=1,\n'
-        '    col_offset=0,\n'
-        '    end_lineno=1,\n'
-        '    end_col_offset=4,\n'
-        "    value=Name(lineno=1, col_offset=0, end_lineno=1, end_col_offset=1, id='a', ctx=Load()),\n"  # noqa: E501
-        '    slice=Index(\n'
-        '        value=Constant(lineno=1, col_offset=2, end_lineno=1, end_col_offset=3, value=0, kind=None),\n'  # noqa: E501
-        '    ),\n'
-        '    ctx=Load(),\n'
-        ')'
-    )
-    expected = expected_39 if sys.version_info >= (3, 9) else expected_38
     ret = astpretty.pformat(_to_expr_value('a[0]'))
     assert ret == expected
 
@@ -302,7 +288,7 @@ Module(
 
 
 def test_pformat_py38_type_comments(tmpdir, capsys):
-    expected_38 = '''\
+    expected_311 = '''\
 Module(
     body=[
         FunctionDef(
@@ -341,7 +327,7 @@ Module(
     type_ignores=[TypeIgnore(lineno=2, tag='')],
 )
 '''  # noqa: E501
-    expected = expected_312 if sys.version_info >= (3, 12) else expected_38
+    expected = expected_312 if sys.version_info >= (3, 12) else expected_311
     mod = (
         'def f():  # type: () -> None\n'
         '    pass  # type: ignore\n'

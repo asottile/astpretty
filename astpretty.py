@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 import ast
 import contextlib
+from collections.abc import Generator
+from collections.abc import Sequence
 from typing import Any
-from typing import Generator
-from typing import Sequence
 
 AST: tuple[type[Any], ...] = (ast.AST,)
 expr_context: tuple[type[Any], ...] = (ast.expr_context,)
