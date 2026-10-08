@@ -80,15 +80,26 @@ def test_pformat_nested_attr_empty_list():
 
 
 def test_pformat_mixed_sub_nodes_and_primitives():
+    if sys.version_info >= (3, 15):  # pragma: >=3.15 cover
+        expected = '''\
+ImportFrom(
+    module='y',
+    names=[alias(name='x', asname=None)],
+    level=0,
+    is_lazy=0,
+)
+'''
+    else:  # pragma: <3.15 cover
+        expected = '''\
+ImportFrom(
+    module='y',
+    names=[alias(name='x', asname=None)],
+    level=0,
+)
+'''
     node = _to_module_body('from y import x')
     ret = astpretty.pformat(node, show_offsets=False)
-    assert ret == (
-        'ImportFrom(\n'
-        "    module='y',\n"
-        "    names=[alias(name='x', asname=None)],\n"
-        '    level=0,\n'
-        ')'
-    )
+    assert ret == expected.rstrip()
 
 
 def test_pformat_nested_multiple_elements():
